@@ -1,0 +1,16 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+        sanitize: [OFF, ON]
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DVS_SANITIZE=${{ matrix.sanitize }} -DCMAKE_BUILD_TYPE=${{ matrix.sanitize == 'ON' && 'Debug' || 'Release' }}
+      - run: cmake --build build -j
+      - run: ctest --test-dir build --output-on-failure
+      - if: matrix.sanitize == 'OFF'
+        run: ./build/vs_bench 20000 128 200
