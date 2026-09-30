@@ -178,9 +178,9 @@ TEST_CASE("load rejects corrupt files") {
     auto write = [&](const std::string& bytes) { std::ofstream(path, std::ios::binary) << bytes; };
 
     write("tiny");
-    CHECK_THROWS(FlatIndex::load(path));
+    CHECK_THROWS((void)FlatIndex::load(path));
     write(std::string(64, '\0'));
-    CHECK_THROWS(FlatIndex::load(path));   // bad magic
+    CHECK_THROWS((void)FlatIndex::load(path));   // bad magic
 
     auto db = random_vectors(10, 4, 1);
     FlatIndex idx(4);
@@ -192,8 +192,8 @@ TEST_CASE("load rejects corrupt files") {
         s.resize(s.size() - 4);
         write(s);
     }
-    CHECK_THROWS(FlatIndex::load(path));
-    CHECK_THROWS(FlatIndex::load("/nonexistent/dir/x.vsix"));
+    CHECK_THROWS((void)FlatIndex::load(path));
+    CHECK_THROWS((void)FlatIndex::load("/nonexistent/dir/x.vsix"));
     std::remove(path.c_str());
 }
 
@@ -234,7 +234,7 @@ TEST_CASE("IVF input validation and empty-cluster repair") {
     p.nlist = 16;
     IvfIndex ivf(4, p);
     CHECK_THROWS_AS(ivf.train(db.data(), 10), std::invalid_argument);   // n < nlist
-    CHECK_THROWS_AS(ivf.search(db.data(), 1, 1), std::logic_error);
+    CHECK_THROWS_AS((void)ivf.search(db.data(), 1, 1), std::logic_error);
 
     // Heavily duplicated data forces empty clusters during Lloyd.
     std::vector<float> dup(400 * 4, 1.0f);
